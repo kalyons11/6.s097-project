@@ -1,35 +1,35 @@
-import numpy as np
+# import np as np
 
-np.random.seed(123)
+# np.random.seed(123)
 
-import keras
+# import keras
 
-from keras import backend as K
+# from keras import backend as K
 
-K.set_image_dim_ordering('th')
+# K.set_image_dim_ordering('th')
 
-from keras.models import Sequential # Feedforward CNN.
+# from keras.models import Sequential # Feedforward CNN.
 
-from keras.layers import Dense, Dropout, Activation, Flatten # Core layers.
+# from keras.layers import Dense, Dropout, Activation, Flatten # Core layers.
 
-from keras.layers import Convolution2D, MaxPooling2D # Image layers.
+# from keras.layers import Convolution2D, MaxPooling2D # Image layers.
 
-from keras.utils import np_utils # Utils for data transformation.
+# from keras.utils import np_utils # Utils for data transformation.
 
-from keras.datasets import mnist # MNIST dataset.
+# from keras.datasets import mnist # MNIST dataset.
 
-(X_train, y_train), (X_test, y_test) = mnist.load_data() # Load.
+# (X_train, y_train), (X_test, y_test) = mnist.load_data() # Load.
 
-# print(X_train.shape)
+# # print(X_train.shape)
 
-# from matplotlib import pyplot as plt
+# # from matplotlib import pyplot as plt
 
-# plt.imshow(X_train[0]) # Show image.
+# # plt.imshow(X_train[0]) # Show image.
 
-# plt.show()
+# # plt.show()
 
 # 3. Import libraries and modules
-import numpy as np
+import np as np
 np.random.seed(123)  # for reproducibility
  
 from keras.models import Sequential
@@ -80,7 +80,7 @@ model.fit(X_train, Y_train,
           batch_size=32, nb_epoch=1, verbose=1)
 
 print("Model trained!")
- 
+
 # 10. Evaluate model on test data
 score = model.evaluate(X_test, Y_test, verbose=0)
 
