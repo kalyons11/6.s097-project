@@ -29,43 +29,53 @@ paired_output_data = data[1: , [2, 3]]
 
 col = np.unique(data[1: , 2])
 
+print(col.shape)
+
 encoder = LabelEncoder()
 
-Y_train_num = encoder.fit_transform(col)
+Y_train_num = np.transpose(encoder.fit_transform(data[1: , 2]))
+
+print(Y_train_num[0])
 
 Y_train_str = encoder.inverse_transform(Y_train_num)
 
 Y_train_num = np_utils.to_categorical(Y_train_num)
 
-# print(Y_train_num.shape)
+print(Y_train_num.shape)
+
+print(Y_train_str.shape)
 
 raw_location_data = data[1 : , -1]
 
 X_train = np.array([parse_location_string(s) for s in raw_location_data]).astype('float64')
 
-from keras.wrappers.scikit_learn import BaseWrapper
-import copy
+print(X_train.shape)
 
-def custom_get_params(self, **params):
-    res = copy.deepcopy(self.sk_params)
-    res.update({'build_fn': self.build_fn})
-    return res
+print(X_train[0])
 
-BaseWrapper.get_params = custom_get_params
+model = Sequential()
 
-def baseline_model():
-	# Create model
-	model = Sequential()
-	model.add(Dense(128, input_dim=2, input_shape=X_train.shape, init='normal', activation='relu'))
-	model.add(Dense(col.shape[0], init='normal', activation='sigmoid'))
-	# Compile model
-	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-	return model
+# Adding layers.
 
-estimator = KerasClassifier(build_fn=baseline_model, nb_epoch=3, batch_size=5, verbose=1)
-kfold = KFold(n_splits=10, shuffle=True, random_state=seed)
-results = cross_val_score(estimator, X_train, Y_train_num, cv=kfold)
+model.add(Dense(2, input_dim = 2))
+model.add(Dense(127, init='normal', activation='sigmoid'))
 
-print("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-print("Process complete!");
+print("Model compiled!")
+
+# 9. Fit model on training data
+model.fit(X_train, Y_train_num, batch_size=32, nb_epoch=5, verbose=1)
+
+print("Model trained!")
+
+# 10. Evaluate model on test data
+score = model.evaluate(X_train, Y_train_num, verbose=1)
+
+print()
+
+print("Model tested!")
+
+print("Score on test data = {}.".format(score))
+
+print("Process complete.")
