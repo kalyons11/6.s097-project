@@ -5,7 +5,7 @@ def parse_location_string(inp):
 	i = inp.index('///')
 	x = float(inp[:i])
 	y = float(inp[i + 3:])
-	return np.array([x, y])
+	return [x, y]
 
 seed = 123
 
@@ -17,7 +17,7 @@ data = np.array(list(csv.reader(open(filename, "rU"), dialect=csv.excel_tab, del
 
 crime_names = [s.upper() for s in np.unique(data[1 : , 2])]
 
-# Declaring categories...
+# Declaring categories.
 
 violent = ["32GUN", "AGGRAVATED ASSAULT", "BALLISTICS", "BIOTHREAT", "BOMB", "BOMB HOAX", "EXPLOS", "EXPLOSIVES", 
 "FIRE", "HOMICIDE", "INDECENT ASSAULT", "MANSLAUG", "RAPE AND ATTEMPTED", "SIMPLE ASSAULT"]
@@ -44,8 +44,27 @@ other = ['07RV', 'AIRCRAFT', 'LICVIOL', 'LABOR', 'LICENSE PLATE RELATED INCIDENT
 
 med = ['MEDASSIST', 'MEDICAL ASSISTANCE', 'MOTOR VEHICLE ACCIDENT RESPONSE', 'OPERATING UNDER INFLUENCE']
 
-for c in crime_names:
-	if c not in violent and c not in damage and c not in disrupt and c not in other and c not in med:
-		print(c)
+# Write separate categories to separate CSV files.
+
+files = ['../data/violent.csv', '../data/damage.csv', '../data/disrupt.csv', '../data/other.csv', '../data/med.csv']
+lists = [violent, damage, disrupt, other, med]
+fields = ['lat', 'long', 'type']
+
+our_data = data[ 1 : , [ -1 , 2 ]]
+
+for i in range(len(lists)):
+	print("Current iteration = {}.".format(i))
+	l = lists[i]
+	with open(files[i], 'w') as f:
+
+		writer = csv.DictWriter(f, fieldnames=fields)
+
+		writer.writeheader()
+
+		for d in our_data:
+			if d[1] in l and d[0] is not '(0.0/// 0.0)':
+				x, y = parse_location_string(d[0])
+				t = d[1]
+				writer.writerow({'lat' : x, 'long' : y, 'type' : t})
 
 print("Process complete.")
