@@ -7,6 +7,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import StandardScaler
 
 def parse_location_string(inp):
 	inp = inp[1:-1]
@@ -25,7 +27,7 @@ data = np.array(list(csv.reader(open(filename, "rU"), dialect=csv.excel_tab, del
 
 paired_output_data = data[1: , [2, 3]]
 
-col = data[1: , 2]
+col = np.unique(data[1: , 2])
 
 encoder = LabelEncoder()
 
@@ -35,41 +37,35 @@ Y_train_str = encoder.inverse_transform(Y_train_num)
 
 Y_train_num = np_utils.to_categorical(Y_train_num)
 
-print(Y_train_num)
+# print(Y_train_num.shape)
 
 raw_location_data = data[1 : , -1]
 
 X_train = np.array([parse_location_string(s) for s in raw_location_data]).astype('float64')
 
-# X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
+from keras.wrappers.scikit_learn import BaseWrapper
+import copy
 
-# So, two input layers, 1 output layer of the crime type they would expect at that location?
+def custom_get_params(self, **params):
+    res = copy.deepcopy(self.sk_params)
+    res.update({'build_fn': self.build_fn})
+    return res
 
-# Let's create our model!
+BaseWrapper.get_params = custom_get_params
 
-model = Sequential()
+def baseline_model():
+	# Create model
+	model = Sequential()
+	model.add(Dense(128, input_dim=2, input_shape=X_train.shape, init='normal', activation='relu'))
+	model.add(Dense(col.shape[0], init='normal', activation='sigmoid'))
+	# Compile model
+	model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+	return model
 
-model.add(Dense(2, input_shape=X_train.shape, init='normal', activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(1, init='normal', activation='sigmoid'))
+estimator = KerasClassifier(build_fn=baseline_model, nb_epoch=3, batch_size=5, verbose=1)
+kfold = KFold(n_splits=10, shuffle=True, random_state=seed)
+results = cross_val_score(estimator, X_train, Y_train_num, cv=kfold)
 
-print("Model created!")
- 
-# 8. Compile model
-model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-print("Model compiled!")
- 
-# 9. Fit model on training data
-model.fit(X_train, Y_train_num, batch_size=32, nb_epoch=1, verbose=1)
-
-print("Model trained!")
-
-# 10. Evaluate model on test data
-score = model.evaluate(X_train, Y_train_num, verbose=1)
-
-print("Model tested!")
-
-print("Score on test data = {}.".format(score))
+print("Baseline: %.2f%% (%.2f%%)" % (results.mean()*100, results.std()*100))
 
 print("Process complete!");
