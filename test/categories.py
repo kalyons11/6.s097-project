@@ -1,24 +1,3 @@
-import numpy as np, csv
-
-def parse_location_string(inp):
-	inp = inp[1:-1]
-	i = inp.index('///')
-	x = float(inp[:i])
-	y = float(inp[i + 3:])
-	return [x, y]
-
-seed = 123
-
-np.random.seed(seed)
-
-filename = '../data/crime_data.csv'
-
-data = np.array(list(csv.reader(open(filename, "rU"), dialect=csv.excel_tab, delimiter=",")))
-
-crime_names = [s.upper() for s in np.unique(data[1 : , 2])]
-
-# Declaring categories.
-
 violent = ["32GUN", "AGGRAVATED ASSAULT", "BALLISTICS", "BIOTHREAT", "BOMB", "BOMB HOAX", "EXPLOS", "EXPLOSIVES", 
 "FIRE", "HOMICIDE", "INDECENT ASSAULT", "MANSLAUG", "RAPE AND ATTEMPTED", "SIMPLE ASSAULT"]
 
@@ -44,6 +23,31 @@ other = ['07RV', 'AIRCRAFT', 'LICVIOL', 'LABOR', 'LICENSE PLATE RELATED INCIDENT
 
 med = ['MEDASSIST', 'MEDICAL ASSISTANCE', 'MOTOR VEHICLE ACCIDENT RESPONSE', 'OPERATING UNDER INFLUENCE']
 
+'''
+
+import numpy as np, csv
+
+def parse_location_string(inp):
+	inp = inp[1:-1]
+	i = inp.index('///')
+	x = float(inp[:i])
+	y = float(inp[i + 3:])
+	return [x, y]
+
+seed = 123
+
+np.random.seed(seed)
+
+filename = '../data/crime_data.csv'
+
+data = np.array(list(csv.reader(open(filename, "rU"), dialect=csv.excel_tab, delimiter=",")))
+
+crime_names = [s.upper() for s in np.unique(data[1 : , 2])]
+
+# Declaring categories.
+
+
+
 # Write separate categories to separate CSV files.
 
 files = ['../data/violent.csv', '../data/damage.csv', '../data/disrupt.csv', '../data/other.csv', '../data/med.csv']
@@ -62,9 +66,12 @@ for i in range(len(lists)):
 		writer.writeheader()
 
 		for d in our_data:
-			if d[1] in l and d[0] is not '(0.0/// 0.0)':
+			if d[1] in l:
 				x, y = parse_location_string(d[0])
 				t = d[1]
-				writer.writerow({'lat' : x, 'long' : y, 'type' : t})
+				if x != 0 and y != 0:
+					writer.writerow({'lat' : x, 'long' : y, 'type' : t})
 
 print("Process complete.")
+
+'''
